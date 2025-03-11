@@ -55,7 +55,8 @@ def admin():
     if claims != "admin":
         return jsonify({"msg": "Accès refusé. Vous devez être un admin."}), 403
 
-    return jsonify(logged_in_as=current_user, msg="Bienvenue sur la page admin."), 200
+    # Rendre la page HTML admin.html avec le nom d'utilisateur actuel
+    return render_template("admin.html", current_user=current_user)
 
 # Route protégée générique pour les utilisateurs
 @app.route("/protected", methods=["GET"])
