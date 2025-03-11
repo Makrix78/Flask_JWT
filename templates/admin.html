@@ -1,15 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-<title>JWT</title>
-</head>    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Admin</title>
+</head>
 <body>
-<h1>Bienvenue à l'atelier JWT</h1>
-<h2>Ceci est le projet de : Prénom Nom</h2>
-<p>Si vous avez mis en ligne votre solution et si cette page s'affiche dans votre navigateur alors vous avez réussi votre mise en service.</p>
-<p>Notions acquises lors de cette étape : Vous avez lors cette première étape apris à créer votre hébergement en ligne sur Alwaydata, installer une application, Forker un projet GitHUB et créer des Secrets qui seront utilisés lors de vos Commits pour mettre à jour votre site en ligne</p>
-<p>- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - </p>
-<h3>Exercices</h3>
-<p>Lire le Readme.md de votre Repository GitHub pur obtenir les consignes de vos exercices.</p>
-<p>- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - </p>
+    <h1>Bienvenue sur la page administrateur</h1>
+    <p>Seul les utilisateurs ayant le rôle "admin" peuvent voir cette page.</p>
+    <p>Bienvenue, {{ current_user }} ! Vous êtes un administrateur.</p>
 </body>
 </html>
