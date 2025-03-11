@@ -1,19 +1,14 @@
 from flask import Flask, render_template, jsonify, request
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import (
+    create_access_token, get_jwt_identity, jwt_required, JWTManager, get_jwt
+)
 from datetime import timedelta
 
 app = Flask(__name__)
 
 # Configuration du module JWT
-app.config["JWT_SECRET_KEY"] = "Ma_clé_secrete"  # Ma clé privée
+app.config["JWT_SECRET_KEY"] = "Ma_clé_secrete"
 jwt = JWTManager(app)
-
-# Exemple de base de données fictive pour les utilisateurs et leurs rôles
-users_db = {
-    "test": {"password": "test", "role": "user"},
-    "admin": {"password": "admin", "role": "admin"}
-}
 
 @app.route('/images')
 def images():
@@ -23,47 +18,40 @@ def images():
 def hello_world():
     return render_template('accueil.html')
 
-# Création d'une route qui vérifie l'utilisateur et retourne un jeton JWT
+# Création d'un dictionnaire des utilisateurs avec rôles
+users = {
+    "test": {"password": "test", "role": "user"},
+    "admin": {"password": "admin", "role": "admin"}
+}
+
 @app.route("/login", methods=["POST"])
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-    
-    # Vérifiez si l'utilisateur existe dans la "base de données"
-    user = users_db.get(username)
+    user = users.get(username, None)
     
     if not user or user["password"] != password:
         return jsonify({"msg": "Mauvais utilisateur ou mot de passe"}), 401
     
-    # Création du jeton avec un rôle inclus dans le payload
-    expires = timedelta(hours=1)  # Le jeton expire dans 1 heure
-    access_token = create_access_token(
-        identity=username, 
-        expires_delta=expires, 
-        additional_claims={"role": user["role"]}  # Ajout du rôle à l'intérieur du jeton
-    )
+    expires = timedelta(hours=1)
+    access_token = create_access_token(identity=username, expires_delta=expires, additional_claims={"role": user["role"]})
     return jsonify(access_token=access_token)
 
-# Route protégée qui nécessite un rôle particulier
-@app.route("/admin", methods=["GET"])
-@jwt_required()
-def admin():
-    # Récupérer le rôle de l'utilisateur à partir du jeton
-    current_user = get_jwt_identity()
-    claims = get_jwt()["role"]  # Accéder aux données de rôle dans le jeton
-    
-    if claims != "admin":
-        return jsonify({"msg": "Accès refusé. Vous devez être un admin."}), 403
-
-    # Rendre la page HTML admin.html avec le nom d'utilisateur actuel
-    return render_template("admin.html", current_user=current_user)
-
-# Route protégée générique pour les utilisateurs
+# Route protégée par un jeton valide
 @app.route("/protected", methods=["GET"])
 @jwt_required()
 def protected():
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
+
+# Route réservée aux administrateurs
+@app.route("/admin", methods=["GET"])
+@jwt_required()
+def admin():
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"msg": "Accès refusé : privilèges insuffisants"}), 403
+    return jsonify({"msg": "Bienvenue, administrateur !"})
 
 if __name__ == "__main__":
     app.run(debug=True)
