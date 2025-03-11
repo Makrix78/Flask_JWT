@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, make_response
 from flask_jwt_extended import (
     create_access_token, get_jwt_identity, jwt_required, JWTManager, get_jwt
 )
@@ -18,6 +18,10 @@ def images():
 def hello_world():
     return render_template('accueil.html')
 
+@app.route('/formulaire')
+def formulaire():
+    return render_template('formulaire.html')
+
 # Création d'un dictionnaire des utilisateurs avec rôles
 users = {
     "test": {"password": "test", "role": "user"},
@@ -35,7 +39,10 @@ def login():
     
     expires = timedelta(hours=1)
     access_token = create_access_token(identity=username, expires_delta=expires, additional_claims={"role": user["role"]})
-    return jsonify(access_token=access_token)
+    
+    response = make_response(jsonify({"msg": "Connexion réussie"}))
+    response.set_cookie("access_token", access_token, httponly=True)
+    return response
 
 # Route protégée par un jeton valide
 @app.route("/protected", methods=["GET"])
